@@ -6,11 +6,11 @@ from OpenGL.GLUT import *
 from PyQt5.QtOpenGL import *
 from PyQt5.QtCore import QPoint, QSize, Qt
 from PyQt5.QtWidgets import QOpenGLWidget
+from Vertex import Vertex
 
 import numpy as np
-import Vertex
 
-MINIMUM_SIZE = QSize(50, 50)
+MINIMUM_SIZE = QSize(200, 200)
 SIZE = QSize(400, 400)
 
 FIRST_LIGHT_POSITION  = [1, 1, 1, 0]
@@ -18,10 +18,11 @@ SECOND_LIGHT_POSITION = [0, 1, 0, 0]
 
 class OpenGLWidget(QOpenGLWidget):
 
-    def __init__(self, parent):
+    def __init__(self, parent = None):
         QOpenGLWidget.__init__(self, parent)
         self.__radius = 1
         self.__quality = 1
+        self.__matrix = []
         self.__xRotation = 0
         self.__yRotation = 0
         self.__zRotation = 0
@@ -65,12 +66,14 @@ class OpenGLWidget(QOpenGLWidget):
             self.set_xRotation(self.__xRotation + 8*dy)
             self.set_yRotation(self.__yRotation + 8*dx)
 
-    def get_radius(self):
-        return self.__radius
+    def set_quality(self, quality):
+        self.__quality = quality
+        self.calculate_matrix()
+        self.update()
 
     def set_radius(self, radius):
         self.__radius = radius
-        self.updateGL()
+        self.update()
     
     def normalize_angle(self, angle):
         while angle < 0:
@@ -82,25 +85,25 @@ class OpenGLWidget(QOpenGLWidget):
         normalize_angle(angle)
         if angle != self.__xRotation:
             self.__xRotation = angle
-            self.updateGL()
+            self.update()
     
     def set_yRotation(self, angle):
         normalize_angle(angle)
         if angle != self.__yRotation:
             self.__yRotation = angle
-            self.updateGL()
+            self.update()
     
     def set_zRotation(self, angle):
         normalize_angle(angle)
         if angle != self.__zRotation:
             self.__zRotation = angle
-            self.updateGL()
+            self.update()
 
-    def draw(self):
-        matrix = []
-        for i in range(180/self.__quality + 1):
+    def calculate_matrix(self):
+        self.__matrix = []
+        for i in range(int(180/self.__quality + 1)):
             array = []
-            for j in range(360/self.__quality + 1):
+            for j in range(int(360/self.__quality + 1)):
                 a = i * self.__quality * np.pi / 180
                 b = j * self.__quality * np.pi / 180
                 vertex = Vertex(
@@ -108,4 +111,7 @@ class OpenGLWidget(QOpenGLWidget):
                         self.__radius * np.sin(b),
                         self.__radius * np.cos(a))
                 array.append(vertex)
-            matrix.append(array)
+            self.__matrix.append(array)
+
+    def draw(self):
+        pass
