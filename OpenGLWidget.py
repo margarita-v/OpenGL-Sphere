@@ -22,7 +22,6 @@ class OpenGLWidget(QOpenGLWidget):
         QOpenGLWidget.__init__(self, parent)
         self.__radius = 1
         self.__quality = 1
-        self.__matrix = []
         self.__xRotation = 0
         self.__yRotation = 0
         self.__zRotation = 0
@@ -68,7 +67,6 @@ class OpenGLWidget(QOpenGLWidget):
 
     def set_quality(self, quality):
         self.__quality = quality
-        self.calculate_matrix()
         self.update()
 
     def set_radius(self, radius):
@@ -99,8 +97,8 @@ class OpenGLWidget(QOpenGLWidget):
             self.__zRotation = angle
             self.update()
 
-    def calculate_matrix(self):
-        self.__matrix = []
+    def draw(self):
+        matrix = []
         for i in range(int(180/self.__quality + 1)):
             array = []
             for j in range(int(360/self.__quality + 1)):
@@ -111,7 +109,16 @@ class OpenGLWidget(QOpenGLWidget):
                         self.__radius * np.sin(b),
                         self.__radius * np.cos(a))
                 array.append(vertex)
-            self.__matrix.append(array)
+            matrix.append(array)
 
-    def draw(self):
-        pass
+        glBegin(GL_POLYGON)
+        glNormal3f(0, 0, 1)
+        for i in range(len(matrix) - 1):
+            for j in range(len(matrix[i]) - 1):
+                firstPoint = matrix[i][j]
+                secondPoint = matrix[i][j+1]
+                thirdPoint = matrix[i+1][j]
+                glVertex3f(firstPoint.getX(), firstPoint.getY(), firstPoint.getZ())
+                glVertex3f(secondPoint.getX(), secondPoint.getY(), secondPoint.getZ())
+                glVertex3f(thirdPoint.getX(), thirdPoint.getY(), thirdPoint.getZ())
+        glEnd()
