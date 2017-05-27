@@ -2,9 +2,13 @@
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
+from OpenGL.GLUT import *
 from PyQt5.QtOpenGL import *
 from PyQt5.QtCore import QPoint, QSize, Qt
 from PyQt5.QtWidgets import QOpenGLWidget
+
+import numpy as np
+import Vertex
 
 MINIMUM_SIZE = QSize(50, 50)
 SIZE = QSize(400, 400)
@@ -17,6 +21,7 @@ class OpenGLWidget(QOpenGLWidget):
     def __init__(self, parent):
         QOpenGLWidget.__init__(self, parent)
         self.__radius = 1
+        self.__quality = 1
         self.__xRotation = 0
         self.__yRotation = 0
         self.__zRotation = 0
@@ -92,4 +97,15 @@ class OpenGLWidget(QOpenGLWidget):
             self.updateGL()
 
     def draw(self):
-        pass
+        matrix = []
+        for i in range(180/self.__quality + 1):
+            array = []
+            for j in range(360/self.__quality + 1):
+                a = i * self.__quality * np.pi / 180
+                b = j * self.__quality * np.pi / 180
+                vertex = Vertex(
+                        self.__radius * np.cos(b),
+                        self.__radius * np.sin(b),
+                        self.__radius * np.cos(a))
+                array.append(vertex)
+            matrix.append(array)
