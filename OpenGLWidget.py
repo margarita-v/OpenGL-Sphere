@@ -112,36 +112,33 @@ class OpenGLWidget(QOpenGLWidget):
             self.update()
 
     def draw(self):
-        multiplier = 1 / self.__quality
+        radius = self.__radius
+        quality = self.__quality
+        y_multiplier = np.pi / quality
+        x_multiplier = 2.0 * y_multiplier
+        
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         glBegin(GL_QUAD_STRIP)
-        for y_index in range(self.__quality):
-            piy = np.pi * multiplier
-            ay = y_index * piy
-            sy = np.sin(ay)
-            cy = np.cos(ay)
-            ty = y_index * multiplier
-            ay1 = ay + piy
-            sy1 = np.sin(ay1)
-            cy1 = np.cos(ay1)
-            ty1 = ty + multiplier
-            for x_index in range(self.__quality):
-                pix = np.pi * multiplier
-                ax = 2.0 * x_index * pix
-                sx = np.sin(ax)
-                cx = np.cos(ax)
-                x = self.__radius * sy * cx
-                y = self.__radius * sy * sx
-                z = self.__radius * cy
-                tx = x_index * multiplier
+        for y_index in range(quality):
+            # theta is the latitude, ranging from 0 to pi
+            theta = y_index * y_multiplier
+            tex_Y = y_index / quality
+            for x_index in range(quality):
+                # phi is the longitude, ranging from 0 to 2*pi
+                phi = x_index * x_multiplier
+                tex_X = x_index / quality
+                x = radius * np.sin(theta) * np.cos(phi)
+                y = radius * np.sin(theta) * np.sin(phi)
+                z = radius * np.cos(theta)
                 glNormal3f(x, y, z)
-                glTexCoord2f(tx, ty)
+                glTexCoord2f(tex_X, tex_Y)
                 glVertex3f(x, y, z)
-                x = self.__radius * sy1 * cx
-                y = self.__radius * sy1 * sx
-                z = self.__radius * cy1
+                theta_new = theta + y_multiplier
+                x = radius * np.sin(theta_new) * np.cos(phi)
+                y = radius * np.sin(theta_new) * np.sin(phi)
+                z = radius * np.cos(theta_new)
                 glNormal3f(x, y, z)
-                glTexCoord2f(tx, ty1)
+                glTexCoord2f(tex_X, tex_Y + 1 / self.__quality)
                 glVertex3f(x, y, z)
         glEnd()
         glFlush()
