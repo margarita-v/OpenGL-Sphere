@@ -14,8 +14,8 @@
    <string>Построение сферы</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -55,7 +55,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="dsbRadius">
+         <widget class="QSpinBox" name="sbRadius">
           <property name="minimumSize">
            <size>
             <width>160</width>
@@ -67,6 +67,12 @@
             <width>160</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>4</number>
           </property>
          </widget>
         </item>
@@ -106,11 +112,14 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="minimum">
+           <number>20</number>
+          </property>
           <property name="maximum">
-           <number>10</number>
+           <number>50</number>
           </property>
           <property name="value">
-           <number>5</number>
+           <number>25</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
