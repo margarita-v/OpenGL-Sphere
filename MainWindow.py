@@ -15,10 +15,10 @@ class Window(QMainWindow):
     def initUI(self):
         uic.loadUi("mainwindow.ui", self)
         self.openGLWidget = OpenGLWidget(self, 
-                self.sbRadius.value(), self.hsQuality.value())
+                self.dsbRadius.value(), self.hsQuality.value())
         self.horizontalLayout.addWidget(self.openGLWidget)
 
-        self.sbRadius.valueChanged.connect(self.radiusChanged)
+        self.dsbRadius.valueChanged.connect(self.radiusChanged)
         self.hsQuality.sliderMoved.connect(self.qualityChanged)
         self.show()
     
@@ -30,7 +30,7 @@ class Window(QMainWindow):
                 self.close()
 
     def radiusChanged(self):
-        self.openGLWidget.set_radius(self.sbRadius.value())
+        self.openGLWidget.set_radius(self.dsbRadius.value())
 
     def qualityChanged(self):
         self.openGLWidget.set_quality(self.hsQuality.value())

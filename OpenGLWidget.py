@@ -6,15 +6,21 @@ from OpenGL.GLUT import *
 from PyQt5.QtOpenGL import *
 from PyQt5.QtCore import QPoint, QSize, Qt
 from PyQt5.QtWidgets import QOpenGLWidget
-from Vertex import Vertex
 
 import numpy as np
 
+# размеры окна
 MINIMUM_SIZE = QSize(200, 200)
 SIZE = QSize(400, 400)
 
-FIRST_LIGHT_POSITION  = [1, 1, 0, 0]
-SECOND_LIGHT_POSITION = [-1, -1, 0, 0]
+# позиции источников света
+FIRST_LIGHT_POSITION  = [1, 1, 1, 0]
+SECOND_LIGHT_POSITION = [1, 1, 0, 0]
+
+# скорость вращения фигуры
+ROTATION_SPEED = 4
+# удаленность фигуры при параллельной проекции
+DISTANCE = 4
 
 class OpenGLWidget(QOpenGLWidget):
 
@@ -36,33 +42,32 @@ class OpenGLWidget(QOpenGLWidget):
     def initializeGL(self):
         glClearColor(0.0, 0.0, 0.0, 0.0)
         glEnable(GL_DEPTH_TEST)
-        glShadeModel(GL_SMOOTH)
+        glShadeModel(GL_FLAT)
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
         glLightfv(GL_LIGHT0, GL_POSITION, FIRST_LIGHT_POSITION)
         glEnable(GL_LIGHT1)
         glLightfv(GL_LIGHT1, GL_POSITION, SECOND_LIGHT_POSITION)
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        gluPerspective(45.0, 1.33, 0.1, 100.0)
-        glMatrixMode(GL_MODELVIEW)
 
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
-        glTranslatef(0.0, 0.0, -10.0);
-        glRotatef(self.__xRotation / 16, 1.0, 0.0, 0.0);
-        glRotatef(self.__yRotation / 16, 0.0, 1.0, 0.0);
-        glRotatef(self.__zRotation / 16, 0.0, 0.0, 1.0);
+        glTranslatef(0.0, 0.0, -10.0)
+        glRotatef(self.__xRotation / ROTATION_SPEED, 1.0, 0.0, 0.0)
+        glRotatef(self.__yRotation / ROTATION_SPEED, 0.0, 1.0, 0.0)
+        glRotatef(self.__zRotation / ROTATION_SPEED, 0.0, 0.0, 1.0)
         self.draw()
 
     def resizeGL(self, width, height):
-        glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(-4, 4, -4, 4, 1.0, 16.0)
+        aspect = width / height
+        glViewport(0, 0, width, height)
+        if aspect > 1:
+            glOrtho(-DISTANCE * aspect, DISTANCE * aspect, -DISTANCE, DISTANCE, 1, 16)
+        else:
+            glOrtho(-DISTANCE, DISTANCE, -DISTANCE / aspect, DISTANCE / aspect, 1, 16)
         glMatrixMode(GL_MODELVIEW)
-
 
     def mousePressEvent(self, _event):
         self.__lastPoint = _event.pos()
@@ -71,8 +76,8 @@ class OpenGLWidget(QOpenGLWidget):
         dx = _event.x() - self.__lastPoint.x()
         dy = _event.y() - self.__lastPoint.y()
         if _event.buttons() & Qt.LeftButton or _event.buttons & Qt.RightButton:
-            self.set_xRotation(self.__xRotation + 8*dy)
-            self.set_yRotation(self.__yRotation + 8*dx)
+            self.set_xRotation(self.__xRotation + dy)
+            self.set_yRotation(self.__yRotation + dx)
 
     def set_quality(self, quality):
         self.__quality = quality
@@ -84,9 +89,9 @@ class OpenGLWidget(QOpenGLWidget):
     
     def normalize_angle(self, angle):
         while angle < 0:
-            angle += 360*16
+            angle += 360
         while angle > 360:
-            angle -= 360*16
+            angle -= 360
 
     def set_xRotation(self, angle):
         self.normalize_angle(angle)
