@@ -18,10 +18,10 @@ SECOND_LIGHT_POSITION = [0, 1, 0, 0]
 
 class OpenGLWidget(QOpenGLWidget):
 
-    def __init__(self, parent = None):
+    def __init__(self, parent):
         QOpenGLWidget.__init__(self, parent)
-        self.__radius = 1
-        self.__quality = 1
+        self.__radius = 30
+        self.__quality = 32
         self.__xRotation = 0
         self.__yRotation = 0
         self.__zRotation = 0
@@ -37,14 +37,17 @@ class OpenGLWidget(QOpenGLWidget):
         glClearColor(0.0, 0.0, 0.0, 0.0)
         glEnable(GL_DEPTH_TEST)
         glShadeModel(GL_SMOOTH)
-        glEnable(GL_LIGHTING)
-        glEnable(GL_LIGHT0)
-        glLightfv(GL_LIGHT0, GL_POSITION, FIRST_LIGHT_POSITION)
-        glLightfv(GL_LIGHT0, GL_POSITION, SECOND_LIGHT_POSITION)
+        #glEnable(GL_LIGHTING)
+        #glEnable(GL_LIGHT0)
+        #glLightfv(GL_LIGHT0, GL_POSITION, FIRST_LIGHT_POSITION)
+        #glLightfv(GL_LIGHT0, GL_POSITION, SECOND_LIGHT_POSITION)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        gluPerspective(45.0, 1.33, 0.1, 100.0)
+        glMatrixMode(GL_MODELVIEW)
 
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        #glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         self.draw()
 
@@ -61,7 +64,7 @@ class OpenGLWidget(QOpenGLWidget):
     def mouseMoveEvent(self, _event):
         dx = _event.x() - self.__lastPoint.x()
         dy = _event.y() - self.__lastPoint.y()
-        if _event.buttons() & LeftButton or _event.buttons & RightButton:
+        if _event.buttons() & Qt.LeftButton or _event.buttons & Qt.RightButton:
             self.set_xRotation(self.__xRotation + 8*dy)
             self.set_yRotation(self.__yRotation + 8*dx)
 
@@ -80,45 +83,55 @@ class OpenGLWidget(QOpenGLWidget):
             angle -= 360*16
 
     def set_xRotation(self, angle):
-        normalize_angle(angle)
+        self.normalize_angle(angle)
         if angle != self.__xRotation:
             self.__xRotation = angle
             self.update()
     
     def set_yRotation(self, angle):
-        normalize_angle(angle)
+        self.normalize_angle(angle)
         if angle != self.__yRotation:
             self.__yRotation = angle
             self.update()
     
     def set_zRotation(self, angle):
-        normalize_angle(angle)
+        self.normalize_angle(angle)
         if angle != self.__zRotation:
             self.__zRotation = angle
             self.update()
 
     def draw(self):
-        matrix = []
-        for i in range(int(180/self.__quality + 1)):
-            array = []
-            for j in range(int(360/self.__quality + 1)):
-                a = i * self.__quality * np.pi / 180
-                b = j * self.__quality * np.pi / 180
-                vertex = Vertex(
-                        self.__radius * np.cos(b),
-                        self.__radius * np.sin(b),
-                        self.__radius * np.cos(a))
-                array.append(vertex)
-            matrix.append(array)
-
-        glBegin(GL_POLYGON)
-        glNormal3f(0, 0, 1)
-        for i in range(len(matrix) - 1):
-            for j in range(len(matrix[i]) - 1):
-                firstPoint = matrix[i][j]
-                secondPoint = matrix[i][j+1]
-                thirdPoint = matrix[i+1][j]
-                glVertex3f(firstPoint.getX(), firstPoint.getY(), firstPoint.getZ())
-                glVertex3f(secondPoint.getX(), secondPoint.getY(), secondPoint.getZ())
-                glVertex3f(thirdPoint.getX(), thirdPoint.getY(), thirdPoint.getZ())
+        multiplier = 1 / self.__quality
+        glColor3f(1.0, 0.0, 0.0)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+        glBegin(GL_QUAD_STRIP)
+        for y_index in range(self.__quality):
+            piy = np.pi * multiplier
+            ay = y_index * piy
+            sy = np.sin(ay)
+            cy = np.cos(ay)
+            ty = y_index * multiplier
+            ay1 = ay + piy
+            sy1 = np.sin(ay1)
+            cy1 = np.cos(ay1)
+            ty1 = ty + multiplier
+            for x_index in range(self.__quality):
+                pix = np.pi * multiplier
+                ax = 2.0 * x_index * pix
+                sx = np.sin(ax)
+                cx = np.cos(ax)
+                x = self.__radius * sy * cx
+                y = self.__radius * sy * sx
+                z = self.__radius * cy
+                tx = x_index * multiplier
+                glNormal3f(x, y, z)
+                glTexCoord2f(tx, ty)
+                glVertex3f(x, y, z)
+                x = self.__radius * sy1 * cx
+                y = self.__radius * sy1 * sx
+                z = self.__radius * cy1
+                glNormal3f(x, y, z)
+                glTexCoord2f(tx, ty1)
+                glVertex3f(x, y, z)
         glEnd()
+        glFlush()

@@ -14,7 +14,7 @@ class Window(QMainWindow):
 
     def initUI(self):
         uic.loadUi("mainwindow.ui", self)
-        self.openGLWidget = OpenGLWidget()
+        self.openGLWidget = OpenGLWidget(self)
         self.horizontalLayout.addWidget(self.openGLWidget)
 
         self.dsbRadius.valueChanged.connect(self.radiusChanged)
