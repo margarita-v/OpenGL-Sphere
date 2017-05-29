@@ -6,8 +6,7 @@ from OpenGL.GLUT import *
 from PyQt5.QtOpenGL import *
 from PyQt5.QtCore import QPoint, QSize, Qt
 from PyQt5.QtWidgets import QOpenGLWidget
-
-import numpy as np
+from math import pi, sin, cos
 
 # размеры окна
 MINIMUM_SIZE = QSize(200, 200)
@@ -114,7 +113,7 @@ class OpenGLWidget(QOpenGLWidget):
     def draw(self):
         radius = self.__radius
         quality = self.__quality
-        y_multiplier = np.pi / quality
+        y_multiplier = pi / quality
         x_multiplier = 2.0 * y_multiplier
         
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
@@ -127,16 +126,16 @@ class OpenGLWidget(QOpenGLWidget):
                 # phi is the longitude, ranging from 0 to 2*pi
                 phi = x_index * x_multiplier
                 tex_X = x_index / quality
-                x = radius * np.sin(theta) * np.cos(phi)
-                y = radius * np.sin(theta) * np.sin(phi)
-                z = radius * np.cos(theta)
+                x = radius * sin(theta) * cos(phi)
+                y = radius * sin(theta) * sin(phi)
+                z = radius * cos(theta)
                 glNormal3f(x, y, z)
                 glTexCoord2f(tex_X, tex_Y)
                 glVertex3f(x, y, z)
                 theta_new = theta + y_multiplier
-                x = radius * np.sin(theta_new) * np.cos(phi)
-                y = radius * np.sin(theta_new) * np.sin(phi)
-                z = radius * np.cos(theta_new)
+                x = radius * sin(theta_new) * cos(phi)
+                y = radius * sin(theta_new) * sin(phi)
+                z = radius * cos(theta_new)
                 glNormal3f(x, y, z)
                 glTexCoord2f(tex_X, tex_Y + 1 / self.__quality)
                 glVertex3f(x, y, z)
