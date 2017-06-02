@@ -51,7 +51,7 @@ class OpenGLWidget(QOpenGLWidget):
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
-        glTranslatef(0.0, 0.0, -10.0)
+        glTranslatef(0.0, 0.0, -5.0)
         glRotatef(self.__xRotation / ROTATION_SPEED, 1.0, 0.0, 0.0)
         glRotatef(self.__yRotation / ROTATION_SPEED, 0.0, 1.0, 0.0)
         glRotatef(self.__zRotation / ROTATION_SPEED, 0.0, 0.0, 1.0)
@@ -61,7 +61,6 @@ class OpenGLWidget(QOpenGLWidget):
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         aspect = width / height
-        glViewport(0, 0, width, height)
         if aspect > 1:
             glOrtho(-DISTANCE * aspect, DISTANCE * aspect, -DISTANCE, DISTANCE, 1, 16)
         else:
@@ -116,7 +115,7 @@ class OpenGLWidget(QOpenGLWidget):
         y_multiplier = pi / quality
         x_multiplier = 2.0 * y_multiplier
         
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+        glPolygonMode(GL_FRONT, GL_FILL)
         glBegin(GL_QUAD_STRIP)
         for y_index in range(quality):
             # theta is the latitude, ranging from 0 to pi
@@ -140,4 +139,3 @@ class OpenGLWidget(QOpenGLWidget):
                 glTexCoord2f(tex_X, tex_Y + 1 / self.__quality)
                 glVertex3f(x, y, z)
         glEnd()
-        glFlush()
